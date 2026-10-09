@@ -1,0 +1,26 @@
+# Root-level
+node_modules
+npm-debug.log*
+
+# Workspace dependencies
+**/node_modules
+
+# Build output
+**/dist
+**/.vite
+**/*.tsbuildinfo
+frontend/vite.config.js
+frontend/vite.config.d.ts
+backend/debug-provider.mjs
+
+# Local env files
+.env
+.env.*
+**/.env
+**/.env.*
+!.env.example
+!**/.env.example
+
+# OS files
+.DS_Store
+Thumbs.db

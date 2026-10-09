@@ -1,0 +1,21 @@
+{
+  "name": "ai-chatbot-portfolio",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AI-powered chatbot with a Node.js backend and React frontend",
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:frontend": "npm --prefix frontend run dev -- --host 0.0.0.0",
+    "build": "npm --prefix backend run build && npm --prefix frontend run build",
+    "start": "npm --prefix backend run start",
+    "preview": "npm --prefix frontend run preview -- --host 0.0.0.0"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
+}
