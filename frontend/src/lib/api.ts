@@ -3,6 +3,8 @@ export type ApiChatMessage = {
   content: string
 }
 
+const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/+$/, '')
+
 export async function sendChatMessage(
   messages: ApiChatMessage[],
   onChunk: (chunk: string) => void,
@@ -10,7 +12,7 @@ export async function sendChatMessage(
 ): Promise<string> {
   let response: Response
   try {
-    response = await fetch('/api/chat', {
+    response = await fetch(`${apiBaseUrl}/api/chat`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

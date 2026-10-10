@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: myai-study-companion-api
+    runtime: node
+    rootDir: backend
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: AI_API_KEY
+        sync: false
+      - key: AI_MODEL
+        value: gemini-3.8-flash
+      - key: FRONTEND_URL
+        value: https://ankii09.github.io

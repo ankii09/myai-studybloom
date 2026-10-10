@@ -104,16 +104,21 @@ npm run build
 
 This builds the backend TypeScript and creates the frontend production bundle.
 
-## Deploy the Backend to Vercel
+## Deploy with GitHub Pages and Render
 
-Create a Vercel project for this repository and set its **Root Directory** to `backend`. Vercel serves the Express app through the catch-all function in `backend/api/[...path].ts`, so the health check is available at `/api/health`.
+The frontend is deployed to GitHub Pages and the Express API is deployed as a Render web service. The repository includes a GitHub Actions workflow and a Render Blueprint (`render.yaml`).
 
-Set these environment variables in the Vercel project:
+### 1. Deploy the backend to Render
 
-```env
-AI_API_KEY=your_google_api_key
-AI_MODEL=gemini-3.8-flash
-FRONTEND_URL=https://your-frontend-domain
-```
+1. In Render, choose **New → Blueprint**, then connect this GitHub repository and apply `render.yaml`.
+2. Set the `AI_API_KEY` environment variable on the Render service to your Google Gemini API key. The blueprint sets `AI_MODEL` and the allowed GitHub Pages origin.
+3. Wait for the service to deploy. Verify `https://YOUR-RENDER-SERVICE.onrender.com/api/health` returns `{"status":"ok","service":"ai-backend"}`.
 
-Deploy the project, then verify that `https://your-backend-domain/api/health` returns `{"status":"ok","service":"ai-backend"}`. Keep `AI_API_KEY` only in the backend's Vercel environment settings; never add it to the frontend.
+### 2. Deploy the frontend to GitHub Pages
+
+1. In the GitHub repository, open **Settings → Secrets and variables → Actions → Variables**.
+2. Add a repository variable named `VITE_API_BASE_URL` with the full Render service origin, for example `https://myai-study-companion-api.onrender.com` (no path required).
+3. In **Settings → Pages**, set the build and deployment source to **GitHub Actions**.
+4. Push to `main`, or manually run **Deploy frontend to GitHub Pages** from the Actions tab. The deployed site URL is `https://ankii09.github.io/myai-study-companion/`.
+
+The workflow expects `VITE_API_BASE_URL` and fails with a clear message if it is missing. It is a public API URL, not a secret. Never put `AI_API_KEY` in GitHub Pages or frontend variables; keep it only in Render's environment settings. GitHub Pages serves the frontend statically and cannot host the Express backend.
