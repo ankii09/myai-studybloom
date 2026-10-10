@@ -99,10 +99,10 @@ Keep `backend/.env` private. The root and backend ignore rules exclude local env
 ## Build
 
 ```bash
-npm run build
+npm run build:all
 ```
 
-This builds the backend TypeScript and creates the frontend production bundle.
+This builds the backend TypeScript and creates the frontend production bundle. The root `npm run build` builds only the backend, which is suitable for Render when its Root Directory is left at the repository root.
 
 ## Deploy with GitHub Pages and Render
 
