@@ -104,10 +104,3 @@ npm run build
 
 This builds the backend TypeScript and creates the frontend production bundle.
 
-## Resume Highlights
-
-- Built a full-stack application with clear frontend and backend boundaries.
-- Integrated a generative AI provider behind a server-side API, keeping credentials out of the browser.
-- Implemented streamed responses, request validation, abort handling, and user-facing error states.
-- Created a persistent student productivity dashboard with task management, daily habit tracking, and a weekly study timetable.
-- Delivered responsive React interfaces with TypeScript and reusable UI components.
