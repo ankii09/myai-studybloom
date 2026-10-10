@@ -117,8 +117,8 @@ The frontend is deployed to GitHub Pages and the Express API is deployed as a Re
 ### 2. Deploy the frontend to GitHub Pages
 
 1. In the GitHub repository, open **Settings → Secrets and variables → Actions → Variables**.
-2. Add a repository variable named `VITE_API_BASE_URL` with the full Render service origin, for example `https://myai-study-companion-api.onrender.com` (no path required).
+2. Add a repository variable named `VITE_API_BASE_URL` with the full Render service origin, for example `https://myai-studybloom-api.onrender.com` (no path required).
 3. In **Settings → Pages**, set the build and deployment source to **GitHub Actions**.
-4. Push to `main`, or manually run **Deploy frontend to GitHub Pages** from the Actions tab. The deployed site URL is `https://ankii09.github.io/myai-study-companion/`.
+4. Push to `main`, or manually run **Deploy frontend to GitHub Pages** from the Actions tab. The deployed site URL is `https://ankii09.github.io/myai-studybloom/`.
 
 The workflow expects `VITE_API_BASE_URL` and fails with a clear message if it is missing. It is a public API URL, not a secret. Never put `AI_API_KEY` in GitHub Pages or frontend variables; keep it only in Render's environment settings. GitHub Pages serves the frontend statically and cannot host the Express backend.

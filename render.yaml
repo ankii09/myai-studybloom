@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: myai-study-companion-api
+    name: myai-studybloom-api
     runtime: node
     rootDir: backend
     buildCommand: npm ci && npm run build
