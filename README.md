@@ -104,3 +104,16 @@ npm run build
 
 This builds the backend TypeScript and creates the frontend production bundle.
 
+## Deploy the Backend to Vercel
+
+Create a Vercel project for this repository and set its **Root Directory** to `backend`. Vercel serves the Express app through the catch-all function in `backend/api/[...path].ts`, so the health check is available at `/api/health`.
+
+Set these environment variables in the Vercel project:
+
+```env
+AI_API_KEY=your_google_api_key
+AI_MODEL=gemini-3.8-flash
+FRONTEND_URL=https://your-frontend-domain
+```
+
+Deploy the project, then verify that `https://your-backend-domain/api/health` returns `{"status":"ok","service":"ai-backend"}`. Keep `AI_API_KEY` only in the backend's Vercel environment settings; never add it to the frontend.
