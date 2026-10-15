@@ -7,11 +7,24 @@ import { logError, logInfo } from '../utils/logger.js'
 export const chatRouter = Router()
 
 function getSafeProviderStatus(error: unknown): number {
-  if (typeof error === 'object' && error !== null && 'statusCode' in error) {
-    const statusCode = error.statusCode
-    if (statusCode === 429) return 429
-    if (statusCode === 408 || statusCode === 504) return 504
+  if (typeof error === 'object' && error !== null) {
+    if ('statusCode' in error) {
+      const statusCode = error.statusCode
+      if (statusCode === 429) return 429
+      if (statusCode === 503) return 503
+      if (statusCode === 408 || statusCode === 504) return 504
+      if (statusCode === 400 || statusCode === 401 || statusCode === 403 || statusCode === 404) return 400
+    }
+    if ('status' in error) {
+      const status = error.status
+      if (status === 429) return 429
+      if (status === 503) return 503
+      if (status === 408 || status === 504) return 504
+      if (status === 400 || status === 401 || status === 403 || status === 404) return 400
+    }
+    if ('lastError' in error) return getSafeProviderStatus(error.lastError)
   }
+
   if (typeof error === 'object' && error !== null && 'code' in error) {
     if (error.code === 'service_unavailable' || error.code === 'overloaded') return 503
     if (error.code === 'rate_limit_exceeded' || error.code === 'RESOURCE_EXHAUSTED') return 429
@@ -22,6 +35,7 @@ function getSafeProviderStatus(error: unknown): number {
 }
 
 function getSafeProviderMessage(statusCode: number): string {
+  if (statusCode === 400) return 'Gemini rejected the request. Check that AI_API_KEY is valid and AI_MODEL is a supported text model.'
   if (statusCode === 429) return 'Gemini API rate limit or quota reached. Wait a little and try again, or check your Google AI Studio quota.'
   if (statusCode === 503) return 'Gemini is temporarily busy. Please try again shortly.'
   if (statusCode === 504) return 'Gemini took too long to respond. Please try again.'
@@ -66,11 +80,12 @@ chatRouter.post('/api/chat', validateChatRequest, async (req, res) => {
     if (abortController.signal.aborted) return
 
     const errorName = error instanceof Error ? error.name : 'UnknownError'
-    logError(`chat request failed: ${errorName}`)
+    const statusCode = getSafeProviderStatus(error)
+    const errorMessage = error instanceof Error ? `: ${error.message}` : ''
+    logError(`chat request failed: ${errorName} (provider status ${statusCode})${errorMessage}`)
     if (res.headersSent) {
       res.end('\n\nSomething went wrong. Please try again.')
     } else {
-      const statusCode = getSafeProviderStatus(error)
       res.status(statusCode).json({ error: getSafeProviderMessage(statusCode) })
     }
   }

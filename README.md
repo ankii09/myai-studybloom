@@ -15,7 +15,7 @@ A full-stack AI chat and study-planning workspace built for students. Ask questi
 
 - Frontend: React 19, TypeScript, Vite, Tailwind CSS, Radix UI, Lucide
 - Backend: Node.js, Express, TypeScript
-- AI: Google Gemini through the Vercel AI SDK
+- AI: Gemini Interactions API through Google's Gen AI SDK
 - Validation: Zod
 
 ## Architecture

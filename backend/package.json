@@ -12,8 +12,7 @@
     "start": "node dist/server.js"
   },
   "dependencies": {
-    "@ai-sdk/google": "^4.0.82",
-    "ai": "^7.0.118",
+    "@google/genai": "^2.30.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",

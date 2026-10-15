@@ -1,9 +1,8 @@
-import { streamText } from 'ai'
-import { createGoogleGenerativeAI } from '@ai-sdk/google'
+import { GoogleGenAI } from '@google/genai'
 import { env } from '../config/env.js'
 import type { ChatMessage } from '../types/chat.js'
 
-const google = createGoogleGenerativeAI({ apiKey: env.aiApiKey })
+const google = new GoogleGenAI({ apiKey: env.aiApiKey })
 
 export const DEFAULT_SYSTEM_PROMPT = `You are My AI, a helpful personal AI assistant.
 Give clear, accurate and useful answers.
@@ -35,19 +34,26 @@ export async function* generateChatResponse(messages: ChatMessage[], abortSignal
   ].join('\n\n')
   const conversation = messages
     .filter((message) => message.role !== 'system')
-    .map((message) => ({ role: message.role, content: message.content }))
+    .map((message) => `${message.role === 'assistant' ? 'Assistant' : 'User'}: ${message.content}`)
+    .join('\n\n')
 
-  const result = streamText({
-    model: google(env.aiModel),
-    system: systemPrompt,
-    messages: conversation,
-    temperature: 0.7,
-    abortSignal,
-    onError: () => undefined,
-  })
+  const stream = await google.interactions.create(
+    {
+      model: env.aiModel,
+      input: `${conversation}\n\nAssistant:`,
+      system_instruction: systemPrompt,
+      stream: true,
+      store: false,
+    },
+    { timeout_ms: 25_000, maxRetries: 2, signal: abortSignal },
+  )
 
-  for await (const part of result.stream) {
-    if (part.type === 'error') throw part.error
-    if (part.type === 'text-delta') yield part.text
+  for await (const event of stream) {
+    if (event.event_type === 'error') {
+      throw new Error(event.error?.message ?? 'Gemini returned an unspecified error.')
+    }
+    if (event.event_type === 'step.delta' && event.delta.type === 'text') {
+      yield event.delta.text
+    }
   }
 }
