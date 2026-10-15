@@ -16,17 +16,9 @@ type EnvConfig = {
 
 const portValue = Number(process.env.PORT ?? '3001')
 
-if (!process.env.AI_MODEL) {
-  throw new Error('Missing required environment variable: AI_MODEL')
-}
-
-if (!process.env.FRONTEND_URL) {
-  throw new Error('Missing required environment variable: FRONTEND_URL')
-}
-
 export const env: EnvConfig = {
   port: Number.isFinite(portValue) && portValue > 0 ? portValue : 3001,
-  frontendUrl: process.env.FRONTEND_URL,
+  frontendUrl: process.env.FRONTEND_URL ?? 'https://ankii09.github.io',
   aiApiKey: process.env.AI_API_KEY ?? '',
-  aiModel: process.env.AI_MODEL,
+  aiModel: process.env.AI_MODEL ?? 'gemini-3.8-flash',
 }

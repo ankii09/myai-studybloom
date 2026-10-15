@@ -102,7 +102,7 @@ Keep `backend/.env` private. The root and backend ignore rules exclude local env
 npm run build:all
 ```
 
-This builds the backend TypeScript and creates the frontend production bundle. The root `npm run build` builds only the backend, which is suitable for Render when its Root Directory is left at the repository root.
+This builds the backend TypeScript and creates the frontend production bundle. The root `npm run build` builds only the backend, which is what Render should run from the repository root.
 
 ## Deploy with GitHub Pages and Render
 
@@ -110,15 +110,18 @@ The frontend is deployed to GitHub Pages and the Express API is deployed as a Re
 
 ### 1. Deploy the backend to Render
 
-1. In Render, choose **New → Blueprint**, then connect this GitHub repository and apply `render.yaml`.
-2. Set the `AI_API_KEY` environment variable on the Render service to your Google Gemini API key. The blueprint sets `AI_MODEL` and the allowed GitHub Pages origin.
-3. Wait for the service to deploy. Verify `https://YOUR-RENDER-SERVICE.onrender.com/api/health` returns `{"status":"ok","service":"ai-backend"}`.
+1. In Render, open the existing web service (or choose **New → Blueprint** and apply `render.yaml`).
+2. Set **Root Directory** to empty / repository root. Do not use `backend`. This repo is an npm workspace, so install and start must run at the root.
+3. Set **Build Command** to `npm ci && npm run build` and **Start Command** to `npm start`.
+4. Set Node to 22, or add a `NODE_VERSION=22` environment variable.
+5. Set `AI_API_KEY` to your Google Gemini API key. Also set `AI_MODEL=gemini-3.8-flash` and `FRONTEND_URL=https://ankii09.github.io` if they are not already present.
+6. Wait for the service to deploy. Verify `https://YOUR-RENDER-SERVICE.onrender.com/api/health` returns `{"status":"ok","service":"ai-backend"}`.
 
 ### 2. Deploy the frontend to GitHub Pages
 
-1. In the GitHub repository, open **Settings → Secrets and variables → Actions → Variables**.
-2. Add a repository variable named `VITE_API_BASE_URL` with the full Render service origin, for example `https://myai-studybloom-api.onrender.com` (no path required).
-3. In **Settings → Pages**, set the build and deployment source to **GitHub Actions**.
+1. In the GitHub repository, open **Settings → Actions → General** and make sure Actions are enabled.
+2. In **Settings → Pages**, set the build and deployment source to **GitHub Actions**.
+3. Optionally add a repository variable named `VITE_API_BASE_URL` with the full Render service origin, for example `https://myai-studybloom-api.onrender.com`. If it is unset, the workflow uses that Render URL by default.
 4. Push to `main`, or manually run **Deploy frontend to GitHub Pages** from the Actions tab. The deployed site URL is `https://ankii09.github.io/myai-studybloom/`.
 
-The workflow expects `VITE_API_BASE_URL` and fails with a clear message if it is missing. It is a public API URL, not a secret. Never put `AI_API_KEY` in GitHub Pages or frontend variables; keep it only in Render's environment settings. GitHub Pages serves the frontend statically and cannot host the Express backend.
+Never put `AI_API_KEY` in GitHub Pages or frontend variables; keep it only in Render's environment settings. GitHub Pages serves the frontend statically and cannot host the Express backend.

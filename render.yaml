@@ -2,11 +2,12 @@ services:
   - type: web
     name: myai-studybloom-api
     runtime: node
-    rootDir: backend
     buildCommand: npm ci && npm run build
     startCommand: npm start
     healthCheckPath: /api/health
     envVars:
+      - key: NODE_VERSION
+        value: "22"
       - key: AI_API_KEY
         sync: false
       - key: AI_MODEL

@@ -2,6 +2,9 @@
   "name": "ai-chatbot-portfolio",
   "version": "1.0.0",
   "private": true,
+  "engines": {
+    "node": ">=22"
+  },
   "description": "AI-powered chatbot with a Node.js backend and React frontend",
   "workspaces": [
     "backend",
