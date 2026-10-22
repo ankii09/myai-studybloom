@@ -1,6 +1,6 @@
 import express from 'express'
 import cors from 'cors'
-import { env } from './config/env.js'
+import { getCorsOrigin } from './config/origins.js'
 import { chatRouter } from './routes/chat.js'
 import { healthRouter } from './routes/health.js'
 import { errorHandler } from './middleware/errorHandler.js'
@@ -11,7 +11,9 @@ export function createApp() {
 
   app.use(
     cors({
-      origin: env.frontendUrl,
+      origin: (origin, callback) => {
+        callback(null, getCorsOrigin(origin))
+      },
       credentials: true,
       methods: ['GET', 'POST', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization'],

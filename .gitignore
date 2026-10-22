@@ -24,3 +24,6 @@ backend/debug-provider.mjs
 # OS files
 .DS_Store
 Thumbs.db
+
+# Vercel
+.vercel

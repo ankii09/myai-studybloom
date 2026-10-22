@@ -104,9 +104,43 @@ npm run build:all
 
 This builds the backend TypeScript and creates the frontend production bundle. The root `npm run build` builds only the backend, which is what Render should run from the repository root.
 
+## Deploy on Vercel (recommended)
+
+Vercel hosts the React app and the `/api/chat` function from one project. Do not set the Root Directory to `frontend` — leave it as the repository root.
+
+1. Push this repo to GitHub if it is not already there.
+2. Open [vercel.com](https://vercel.com), sign in with GitHub, and click **Add New → Project**.
+3. Import this repository.
+4. Confirm the project settings:
+   - **Root Directory:** leave empty (repository root)
+   - **Framework Preset:** Other
+   - **Build Command:** `npm run build && npm run build --workspace frontend`
+   - **Output Directory:** `frontend/dist`
+   - **Install Command:** `npm install`
+   - **Node.js Version:** 22
+5. Open **Environment Variables** before the first deploy and add:
+
+   | Name | Value |
+   | --- | --- |
+   | `AI_API_KEY` | your Google Gemini API key from [Google AI Studio](https://aistudio.google.com/app/apikey) |
+   | `AI_MODEL` | `gemini-3.8-flash` |
+   | `FRONTEND_URL` | your Vercel URL, for example `https://your-app.vercel.app` |
+
+   Do **not** set `VITE_API_BASE_URL`. The site calls `/api/chat` on the same Vercel domain.
+6. Click **Deploy**.
+7. After it finishes, open `https://YOUR-APP.vercel.app/api/health`. You should see `{"status":"ok","service":"ai-backend"}`.
+8. Open the site URL, send a message, and confirm a full reply streams in.
+9. If you use a custom domain later, add that origin as `FRONTEND_URL` and redeploy.
+
+Common Vercel mistakes:
+
+- Missing `AI_API_KEY` — chat will fail with a missing-key error.
+- Root Directory set to `frontend` — `/api/chat` will not deploy.
+- Setting `VITE_API_BASE_URL` to localhost or an old Render URL — the browser will call the wrong backend.
+
 ## Deploy with GitHub Pages and Render
 
-The frontend is deployed to GitHub Pages and the Express API is deployed as a Render web service. The repository includes a GitHub Actions workflow and a Render Blueprint (`render.yaml`).
+The frontend can also be deployed to GitHub Pages with the Express API on Render. The repository includes a GitHub Actions workflow and a Render Blueprint (`render.yaml`).
 
 ### 1. Deploy the backend to Render
 

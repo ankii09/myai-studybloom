@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { generateChatResponse } from '../services/ai.js'
+import { AiServiceError, generateChatResponse } from '../services/ai.js'
 import { validateChatRequest } from '../middleware/validate.js'
 import type { ChatRequest } from '../types/chat.js'
 import { logError, logInfo } from '../utils/logger.js'
@@ -7,6 +7,8 @@ import { logError, logInfo } from '../utils/logger.js'
 export const chatRouter = Router()
 
 function getSafeProviderStatus(error: unknown): number {
+  if (error instanceof AiServiceError) return error.statusCode
+
   if (typeof error === 'object' && error !== null) {
     if ('statusCode' in error) {
       const statusCode = error.statusCode
@@ -34,7 +36,8 @@ function getSafeProviderStatus(error: unknown): number {
   return 502
 }
 
-function getSafeProviderMessage(statusCode: number): string {
+function getSafeProviderMessage(error: unknown, statusCode: number): string {
+  if (error instanceof AiServiceError) return error.message
   if (statusCode === 400) return 'Gemini rejected the request. Check that AI_API_KEY is valid and AI_MODEL is a supported text model.'
   if (statusCode === 429) return 'Gemini API rate limit or quota reached. Wait a little and try again, or check your Google AI Studio quota.'
   if (statusCode === 503) return 'Gemini is temporarily busy. Please try again shortly.'
@@ -54,7 +57,6 @@ chatRouter.post('/api/chat', validateChatRequest, async (req, res) => {
   })
 
   try {
-    const encoder = new TextEncoder()
     let streamed = false
 
     for await (const chunk of generateChatResponse(sanitizedMessages, abortController.signal)) {
@@ -63,15 +65,17 @@ chatRouter.post('/api/chat', validateChatRequest, async (req, res) => {
         res.setHeader('Cache-Control', 'no-cache, no-transform')
         res.setHeader('Connection', 'keep-alive')
         res.setHeader('X-Accel-Buffering', 'no')
+        res.flushHeaders()
         streamed = true
       }
 
-      if (!res.write(encoder.encode(chunk))) {
+      if (!res.write(chunk)) {
         await new Promise<void>((resolve) => res.once('drain', resolve))
       }
     }
 
     if (!streamed) {
+      if (abortController.signal.aborted) return
       return res.status(502).json({ error: 'The AI service returned an empty response. Please try again.' })
     }
 
@@ -86,7 +90,7 @@ chatRouter.post('/api/chat', validateChatRequest, async (req, res) => {
     if (res.headersSent) {
       res.end('\n\nSomething went wrong. Please try again.')
     } else {
-      res.status(statusCode).json({ error: getSafeProviderMessage(statusCode) })
+      res.status(statusCode).json({ error: getSafeProviderMessage(error, statusCode) })
     }
   }
 })
